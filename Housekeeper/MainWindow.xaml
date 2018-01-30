@@ -3,10 +3,22 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:Housekeeper"
         mc:Ignorable="d"
-        Title="MainWindow" Height="350" Width="525">
+        Title="Housekeeper" Height="350" Width="525">
+    <Window.Resources>
+        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
+    </Window.Resources>
     <Grid>
-        
+        <Grid.RowDefinitions>
+            
+        </Grid.RowDefinitions>
+        <StackPanel Orientation="Horizontal" Visibility="{Binding ShowLogin, Converter={StaticResource BooleanToVisibilityConverter}}">
+        <ComboBox x:Name="UserCombo" Height="30" Width="200"
+                  ItemsSource="{Binding AllUsers}"
+                  DisplayMemberPath="FullName"
+                  VerticalContentAlignment="Center"/>
+            <Button Height="30" Width="100" Content="Login"
+                    Click="Login_OnClick"/>
+        </StackPanel>
     </Grid>
 </Window>
