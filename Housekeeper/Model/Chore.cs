@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Housekeeper.Model
 {
@@ -15,6 +11,7 @@ namespace Housekeeper.Model
         public string Task { get; set; }
         public DateTime LastPerform { get; set; }
         public int Frequency { get; set; }
+        public int? Duration { get; set; }
 
         #endregion Properties
 
