@@ -9,16 +9,40 @@
         <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
     </Window.Resources>
     <Grid>
-        <Grid.RowDefinitions>
-            
-        </Grid.RowDefinitions>
-        <StackPanel Orientation="Horizontal" Visibility="{Binding ShowLogin, Converter={StaticResource BooleanToVisibilityConverter}}">
-        <ComboBox x:Name="UserCombo" Height="30" Width="200"
-                  ItemsSource="{Binding AllUsers}"
-                  DisplayMemberPath="FullName"
-                  VerticalContentAlignment="Center"/>
-            <Button Height="30" Width="100" Content="Login"
+        <StackPanel Orientation="Vertical" HorizontalAlignment="Center" VerticalAlignment="Center" Visibility="{Binding ShowLogin, Converter={StaticResource BooleanToVisibilityConverter}}">
+            <!--Placeholder for icon-->
+            <StackPanel Orientation="Horizontal">
+                <Label Content="Username:" Height="30"/>
+                <ComboBox x:Name="UserCombo" Height="30" Width="200"
+                          ItemsSource="{Binding AllUsers}"
+                          SelectedItem="{Binding CurrentUser, Mode=TwoWay}"
+                          DisplayMemberPath="Username"
+                          SelectedValuePath="Username"
+                          VerticalContentAlignment="Center"
+                          SelectionChanged="UserCombo_OnSelectionChanged"/>
+            </StackPanel>
+            <Button Height="30" Width="100" Margin="5" Content="Login"
+                    IsEnabled="{Binding AllowLogin}"
                     Click="Login_OnClick"/>
+            <Button Height="30" Width="100" Margin="5" Content="Add User"
+                    Click="AddUser_OnClick"/>
+        </StackPanel>
+
+        <StackPanel Orientation="Vertical" Visibility="{Binding LoggedIn, Converter={StaticResource BooleanToVisibilityConverter}}">
+            <Border Height="30" Background="DarkOrange">
+            </Border>
+            <DataGrid HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" HorizontalScrollBarVisibility="Hidden"
+                      AutoGenerateColumns="False" ColumnWidth="*"
+                      CanUserAddRows="False" IsReadOnly="True"
+                      ItemsSource="{Binding ScheduledChores}">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Chore ID" Binding="{Binding ID}" Width="Auto"/>
+                    <DataGridTextColumn Header="Area" Binding="{Binding Chore.Category}"/>
+                    <DataGridTextColumn Header="Chore" Binding="{Binding Chore.Task}"/>
+                    <DataGridTextColumn Header="Assigned To" Binding="{Binding AssignedTo.Username}"/>
+                    <DataGridTextColumn Header="Duration" Binding="{Binding Chore.Duration}"/>
+                </DataGrid.Columns>
+            </DataGrid>
         </StackPanel>
     </Grid>
 </Window>

@@ -16,10 +16,11 @@ namespace Housekeeper
         public const string ASSIGNED_COL = "AssignedTo";
         public const string CATEGORY_COL = "Category";
         public const string CHORE_COL = "Chore";
+        public const string DURATION_COL = "Duration";
         public const string ID_COL = "ID";
         public const string FREQUENCY_COL = "Frequency";
         public const string NAME_COL = "Username";
-        public const string PERFORMED_COL = "LastPerform";
+        public const string PERFORMED_COL = "LastPerformed";
         public const string TASK_COL = "Task";
 
         // Table Constants -- Ends with _TABLE
@@ -52,7 +53,7 @@ namespace Housekeeper
             OleDbConnectionStringBuilder builder = new OleDbConnectionStringBuilder();
             builder.Provider = "Microsoft.Jet.OLEDB.4.0";
             builder.DataSource = dbPath;
-            
+
             _conn = new OleDbConnection(builder.ConnectionString);
         }
 
@@ -95,12 +96,12 @@ namespace Housekeeper
         /// <summary>
         /// Adds a new user to the database.
         /// </summary>
-        public void AddUser(int fullName)
+        public void AddUser(string fullName)
         {
             try
             {
                 _conn.Open();
-                string sql = $"INSERT INTO [{USER_TABLE}] ({NAME_COL}) VALUES ({fullName})";
+                string sql = $"INSERT INTO [{USER_TABLE}] ({NAME_COL}) VALUES ('{fullName}')";
 
                 using (OleDbCommand command = new OleDbCommand(sql, _conn))
                 {
@@ -141,6 +142,7 @@ namespace Housekeeper
                             chore.Task = Convert.ToString(reader[TASK_COL]);
                             chore.LastPerform = Convert.ToDateTime(reader[PERFORMED_COL]);
                             chore.Frequency = Convert.ToInt32(reader[FREQUENCY_COL]);
+                            chore.Duration = reader[DURATION_COL] != DBNull.Value ? Convert.ToInt32(reader[DURATION_COL]) : (int?)null;
                             chores.Add(chore);
                         }
                     }
@@ -158,7 +160,7 @@ namespace Housekeeper
 
         #region Schedule
 
-        public List<ScheduledChore> GetScheduledChores(List<Chore> allChores)
+        public List<ScheduledChore> GetScheduledChores()
         {
             List<ScheduledChore> tasks = new List<ScheduledChore>();
 
