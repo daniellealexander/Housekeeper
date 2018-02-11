@@ -1,5 +1,5 @@
-﻿using Housekeeper.Model;
-using System;
+﻿using System;
+using Housekeeper.Model;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -40,6 +40,7 @@ namespace Housekeeper.ViewModel
 
         public User CurrentUser { get; set; }
         public DataTable Schedule { get; set; }
+        public ScheduledChore SelectedChore { get; set; }
 
         public bool ShowLogin { get; set; }
         public bool AllowLogin { get { return CurrentUser != null; } }
@@ -49,6 +50,9 @@ namespace Housekeeper.ViewModel
 
         #region Methods
 
+        /// <summary>
+        /// Queries the database to initialize the chore and user collections
+        /// </summary>
         private void InitializeCollections()
         {
             AllUsers = _repo.GetUsers();
@@ -58,6 +62,9 @@ namespace Housekeeper.ViewModel
             InterpolateSchedule();
         }
 
+        /// <summary>
+        /// Interprets user and chore IDs into human-readable names
+        /// </summary>
         private void InterpolateSchedule()
         {
             foreach (ScheduledChore chore in ScheduledChores)
@@ -69,9 +76,11 @@ namespace Housekeeper.ViewModel
             OnPropertyChanged("ScheduledChores");
         }
 
-        public void Login(string userName)
+        /// <summary>
+        /// Updates the boolean properties for state
+        /// </summary>
+        public void Login()
         {
-            CurrentUser = AllUsers.FirstOrDefault(u => u.Username.Equals(userName, StringComparison.CurrentCultureIgnoreCase));
             if (CurrentUser == null) return;
 
             ShowLogin = false;
@@ -79,6 +88,9 @@ namespace Housekeeper.ViewModel
             OnPropertyChanged("LoggedIn");
         }
 
+        /// <summary>
+        /// Requests the user be added to the database, then re-queries the local collection
+        /// </summary>
         public void AddUser(string userName)
         {
             _repo.AddUser(userName);
@@ -86,11 +98,62 @@ namespace Housekeeper.ViewModel
             OnPropertyChanged("AllUsers");
         }
 
+        /// <summary>
+        /// Requests the chore be added to the database, then re-queries the local collection
+        /// </summary>
+        public void AddChore(Chore newChore)
+        {
+            _repo.AddChore(newChore);
+            AllChores = _repo.GetChores();
+            OnPropertyChanged("AllChores");
+        }
+
+        /// <summary>
+        /// Requests the chore be editted in the database, then re-queries the local collection
+        /// </summary>
+        public void EditChore(Chore modifiedChore)
+        {
+            _repo.ModifyChore(modifiedChore);
+            AllChores = _repo.GetChores();
+            OnPropertyChanged("AllChores");
+        }
+
+        /// <summary>
+        /// Requests the specified chore be assigned to the specified user, then re-queries the local collection
+        /// </summary>
+        public void ScheduleChore(Chore chore, User user)
+        {
+            ScheduledChore scheduledChore = chore as ScheduledChore;
+            _repo.AssignChore(chore, user, scheduledChore?.ID ?? -1);
+            ScheduledChores = _repo.GetScheduledChores();
+
+            InterpolateSchedule();
+        }
+
+        /// <summary>
+        /// Updates the last performed date to today and removes the selected chore from the schedule
+        /// </summary>
+        public void CompleteChore()
+        {
+            SelectedChore.LastPerform = DateTime.Today;
+            _repo.ModifyChore(SelectedChore);
+            AllChores = _repo.GetChores();
+            OnPropertyChanged("AllChores");
+
+            _repo.CompleteChore(SelectedChore);
+        }
+
+        /// <summary>
+        /// Helper method to update the enabled state for the Login button
+        /// </summary>
         public void UpdateProperties()
         {
             OnPropertyChanged("AllowLogin");
         }
 
+        /// <summary>
+        /// Required for IPropertyChanged
+        /// </summary>
         protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));

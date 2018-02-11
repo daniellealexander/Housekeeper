@@ -3,8 +3,6 @@ using System;
 using System.Collections.Generic;
 using System.Data.OleDb;
 using System.IO;
-using System.Linq;
-using System.Reflection;
 
 namespace Housekeeper
 {
@@ -69,7 +67,7 @@ namespace Housekeeper
             try
             {
                 _conn.Open();
-                string sql = $"Select * FROM [{USER_TABLE}]";
+                string sql = $"SELECT * FROM [{USER_TABLE}]";
 
                 using (OleDbCommand command = new OleDbCommand(sql, _conn))
                 {
@@ -101,7 +99,10 @@ namespace Housekeeper
             try
             {
                 _conn.Open();
-                string sql = $"INSERT INTO [{USER_TABLE}] ({NAME_COL}) VALUES ('{fullName}')";
+                string sql = $"INSERT INTO [{USER_TABLE}] " +
+                             $"({NAME_COL}) " +
+                             $"VALUES " +
+                             $"('{fullName}')";
 
                 using (OleDbCommand command = new OleDbCommand(sql, _conn))
                 {
@@ -156,10 +157,62 @@ namespace Housekeeper
             return chores;
         }
 
+        /// <summary>
+        /// Adds a new chore to the database
+        /// </summary>
+        public void AddChore(Chore newChore)
+        {
+            try
+            {
+                _conn.Open();
+                string sql = $"INSERT INTO [{CHORE_TABLE}] " +
+                             $"({CATEGORY_COL}, {TASK_COL}, {FREQUENCY_COL}, {DURATION_COL}, {PERFORMED_COL}) " +
+                             $"VALUES " +
+                             $"('{newChore.Category.ToString()}', '{newChore.Task}', {newChore.Frequency}, {newChore.Duration ?? 0}, {newChore.LastPerform})";
+
+                using (OleDbCommand command = new OleDbCommand(sql, _conn))
+                {
+                    command.ExecuteNonQuery();
+                }
+            }
+            finally
+            {
+                _conn.Close();
+            }
+        }
+
+        /// <summary>
+        /// Modifies an existing chore in the database with new, user given values
+        /// </summary>
+        public void ModifyChore(Chore modifiedChore)
+        {
+            try
+            {
+                _conn.Open();
+                string sql = $"UPDATE [{CHORE_TABLE}] " +
+                             $"SET {FREQUENCY_COL} = {modifiedChore.Frequency}, " +
+                             $"{DURATION_COL} = {modifiedChore.Duration}, " +
+                             $"{PERFORMED_COL} = {modifiedChore.LastPerform} " +
+                             $"WHERE {ID_COL} = {modifiedChore.ID}";
+
+                using (OleDbCommand command = new OleDbCommand(sql, _conn))
+                {
+                    command.ExecuteNonQuery();
+                }
+            }
+            finally
+            {
+                _conn.Close();
+            }
+        }
+
         #endregion Chores
 
         #region Schedule
 
+        /// <summary>
+        /// Gets a list of chores that have already been scheduled for the household
+        /// </summary>
         public List<ScheduledChore> GetScheduledChores()
         {
             List<ScheduledChore> tasks = new List<ScheduledChore>();
@@ -190,6 +243,61 @@ namespace Housekeeper
             }
 
             return tasks;
+        }
+
+        /// <summary>
+        /// Assigns the chore to the user, updating the assignment if the chore was already scheduled
+        /// </summary>
+        public void AssignChore(Chore chore, User user, int oldId = -1)
+        {
+            try
+            {
+                _conn.Open();
+
+                string sql = string.Empty;
+
+                if (oldId > -1)
+                    sql = $"UPDATE [{SCHEDULE_TABLE}] " +
+                          $"SET {ASSIGNED_COL} = {user.ID} " +
+                          $"WHERE {ID_COL} = {oldId}";
+
+                else
+                    sql = $"INSERT INTO [{SCHEDULE_TABLE}] " +
+                          $"({CHORE_COL}, {ASSIGNED_COL}) " +
+                          $"VALUES " +
+                          $"({chore.ID}, {user.ID})";
+
+                using (OleDbCommand command = new OleDbCommand(sql, _conn))
+                {
+                    command.ExecuteNonQuery();
+                }
+            }
+            finally
+            {
+                _conn.Close();
+            }
+        }
+
+        /// <summary>
+        /// Removes the chore from the current schedule
+        /// </summary>
+        public void CompleteChore(Chore chore)
+        {
+            try
+            {
+                _conn.Open();
+
+                string sql = $"DELETE FROM [{SCHEDULE_TABLE}] " +
+                             $"WHERE {ID_COL} = {chore.ID}";
+                using (OleDbCommand command = new OleDbCommand(sql, _conn))
+                {
+                    command.ExecuteNonQuery();
+                }
+            }
+            finally
+            {
+                _conn.Close();
+            }
         }
 
         #endregion Schedule

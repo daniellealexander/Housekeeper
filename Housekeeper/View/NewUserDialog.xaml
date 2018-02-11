@@ -5,6 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d"
         ResizeMode="NoResize"
+        Icon="../Resources/Housekeeper.ico"
         Title="New User" Height="135" Width="300">
     <Grid>
         <StackPanel Margin="5,5,5,5">

@@ -19,10 +19,12 @@ namespace Housekeeper.Model
 
         public enum ChoreCategory
         {
-            General,
             Bedroom,
+            Kitchen,
+            Living,
             Bathroom,
-            Kitchen
+            Outdoors,
+            General
         }
 
         #endregion Enums
