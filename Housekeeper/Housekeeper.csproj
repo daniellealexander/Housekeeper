@@ -139,5 +139,16 @@
   <ItemGroup>
     <Resource Include="Resources\Housekeeper.ico" />
   </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\DoneChore.PNG" />
+    <Resource Include="Resources\EditChore.PNG" />
+    <Resource Include="Resources\ScheduleChore.PNG" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\DeleteChore.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\CreateChore.png" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

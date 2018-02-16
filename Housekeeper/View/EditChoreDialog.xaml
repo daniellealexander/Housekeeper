@@ -5,8 +5,12 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d"
         ResizeMode="NoResize"
+        DataContextChanged="EditChoreDialog_OnDataContextChanged"
         Icon="../Resources/Housekeeper.ico"
-        Height="290" Width="400">
+        Height="240" Width="400">
+    <Window.Resources>
+        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
+    </Window.Resources>
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -25,36 +29,49 @@
         <Border Grid.Row="0" Grid.ColumnSpan="2" Height="30" Background="DarkOrange">
         </Border>
 
-        <Label Content="Category: " Grid.Row="1" Grid.Column="0" Margin="2"/>
-        <ComboBox Grid.Row="1" Grid.Column="1" Margin="2" 
+        <Label Content="Category: " Grid.Row="1" Grid.Column="0" Margin="2"
+               Visibility="{Binding AddingChore, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+        <ComboBox x:Name="CategoryBox" Grid.Row="1" Grid.Column="1" Margin="2" 
                   ItemsSource="{Binding AllCategories}"
-                  SelectedValue="{Binding EditableChore.Category}" 
-                  IsEnabled="{Binding IsAddingChore}"/>
+                  SelectedValue="{Binding SelectedChore.CategoryString, Mode=OneWay}" 
+                  Visibility="{Binding AddingChore, Converter={StaticResource BooleanToVisibilityConverter}}"/>
 
-        <Label Content="Task: " Grid.Row="2" Grid.Column="0" Margin="2"/>
-        <TextBox Text="{Binding EditableChore.Task}" Grid.Row="2" Grid.Column="1" Margin="2" IsEnabled="{Binding IsAddingChore}"/>
+        <Label Content="Task: " Grid.Row="2" Grid.Column="0" Margin="2"
+               Visibility="{Binding AddingChore, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+        <TextBox x:Name="TaskBox" Grid.Row="2" Grid.Column="1" Margin="2" 
+                 Text="{Binding SelectedChore.Task, Mode=OneWay}" 
+                 Visibility="{Binding AddingChore, Converter={StaticResource BooleanToVisibilityConverter}}"/>
 
-        <Label Content="Frequency: " Grid.Row="3" Grid.Column="0" Margin="2"/>
-        <TextBox Text="{Binding EditableChore.Frequency}" Grid.Row="3" Grid.Column="1" Margin="2"/>
+        <Label Content="Frequency (days): " Grid.Row="3" Grid.Column="0" Margin="2"/>
+        <TextBox x:Name="FrequencyBox" Grid.Row="3" Grid.Column="1" Margin="2"
+                 Text="{Binding SelectedChore.Frequency, Mode=OneWay}"/>
 
-        <Label Content="Duration: " Grid.Row="4" Grid.Column="0" Margin="2"/>
-        <TextBox Text="{Binding EditableChore.Duration}" Grid.Row="4" Grid.Column="1" Margin="2"/>
+        <Label Content="Duration (mins): " Grid.Row="4" Grid.Column="0" Margin="2"/>
+        <TextBox x:Name="DurationBox" Grid.Row="4" Grid.Column="1" Margin="2"
+                 Text="{Binding SelectedChore.Duration, Mode=OneWay}" />
 
-        <Label Content="Assign To: " Grid.Row="5" Grid.Column="0" Margin="2"/>
-        <ComboBox Grid.Row="5" Grid.Column="1" Margin="2"
+        <Label Content="Assign To: " Grid.Row="5" Grid.Column="0" Margin="2"
+               Visibility="{Binding EdittingChore, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+        <ComboBox x:Name="UserBox" Grid.Row="5" Grid.Column="1" Margin="2"
                   ItemsSource="{Binding AllUsers}"
-                  SelectedItem="{Binding AssignedUser, Mode=TwoWay}"
+                  SelectedItem="{Binding SelectedChore.AssignedTo, Mode=OneWay}"
                   DisplayMemberPath="Username"
-                  SelectedValuePath="Username"/>
+                  SelectedValuePath="Username"
+                  Visibility="{Binding EdittingChore, Converter={StaticResource BooleanToVisibilityConverter}}"/>
 
-        <Label Content="Last Performed: " Grid.Row="6" Grid.Column="0" Margin="2"/>
-        <DatePicker SelectedDate="{Binding EditableChore.LastPerform}" Grid.Row="6" Grid.Column="1" Margin="2"/>
+        <Label Content="Last Performed: " Grid.Row="6" Grid.Column="0" Margin="2"
+               Visibility="{Binding EdittingChore, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+        <DatePicker x:Name="PerformBox" Grid.Row="6" Grid.Column="1" Margin="2"
+                    SelectedDate="{Binding SelectedChore.LastPerform, Mode=OneWay}"
+                    Visibility="{Binding EdittingChore, Converter={StaticResource BooleanToVisibilityConverter}}"/>
 
-        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="2" Grid.Row="7" Grid.Column="1">
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="2" Grid.Row="7" Grid.ColumnSpan="2">
             <Button Margin="0,0,5,0" Padding="8" Width="100" Content="OK" 
                 Click="BtnOk_Click" />
             <Button Margin="5,0,0,0" Padding="8" Width="100" Content="Cancel" 
                 IsCancel="True"/>
+            <Button Margin="5,0,0,0" Padding="8" Width="100" Content="Delete" 
+                    Click="BtnDelete_Click"/>
         </StackPanel>
     </Grid>
 </Window>

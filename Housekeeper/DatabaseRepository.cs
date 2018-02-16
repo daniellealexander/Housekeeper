@@ -1,8 +1,10 @@
 ﻿using Housekeeper.Model;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Data.OleDb;
 using System.IO;
+using System.Linq;
 
 namespace Housekeeper
 {
@@ -168,7 +170,7 @@ namespace Housekeeper
                 string sql = $"INSERT INTO [{CHORE_TABLE}] " +
                              $"({CATEGORY_COL}, {TASK_COL}, {FREQUENCY_COL}, {DURATION_COL}, {PERFORMED_COL}) " +
                              $"VALUES " +
-                             $"('{newChore.Category.ToString()}', '{newChore.Task}', {newChore.Frequency}, {newChore.Duration ?? 0}, {newChore.LastPerform})";
+                             $"('{newChore.Category.ToString()}', '{newChore.Task}', {newChore.Frequency}, {newChore.Duration ?? 0}, '{DateTime.Today}')";
 
                 using (OleDbCommand command = new OleDbCommand(sql, _conn))
                 {
@@ -184,7 +186,7 @@ namespace Housekeeper
         /// <summary>
         /// Modifies an existing chore in the database with new, user given values
         /// </summary>
-        public void ModifyChore(Chore modifiedChore)
+        public void ModifyChore(ScheduledChore modifiedChore)
         {
             try
             {
@@ -192,9 +194,31 @@ namespace Housekeeper
                 string sql = $"UPDATE [{CHORE_TABLE}] " +
                              $"SET {FREQUENCY_COL} = {modifiedChore.Frequency}, " +
                              $"{DURATION_COL} = {modifiedChore.Duration}, " +
-                             $"{PERFORMED_COL} = {modifiedChore.LastPerform} " +
-                             $"WHERE {ID_COL} = {modifiedChore.ID}";
+                             $"{PERFORMED_COL} = '{modifiedChore.LastPerform}' " +
+                             $"WHERE {ID_COL} = {modifiedChore.ChoreID}";
 
+                using (OleDbCommand command = new OleDbCommand(sql, _conn))
+                {
+                    command.ExecuteNonQuery();
+                }
+            }
+            finally
+            {
+                _conn.Close();
+            }
+        }
+
+        /// <summary>
+        /// Removes the chore from the directory
+        /// </summary>
+        public void DeleteChore(Chore chore)
+        {
+            try
+            {
+                _conn.Open();
+
+                string sql = $"DELETE FROM [{CHORE_TABLE}] " +
+                             $"WHERE {ID_COL} = {chore.ID}";
                 using (OleDbCommand command = new OleDbCommand(sql, _conn))
                 {
                     command.ExecuteNonQuery();
@@ -213,9 +237,9 @@ namespace Housekeeper
         /// <summary>
         /// Gets a list of chores that have already been scheduled for the household
         /// </summary>
-        public List<ScheduledChore> GetScheduledChores()
+        public ObservableCollection<ScheduledChore> GetScheduledChores(List<Chore> allChores, List<User> allUsers)
         {
-            List<ScheduledChore> tasks = new List<ScheduledChore>();
+            ObservableCollection<ScheduledChore> tasks = new ObservableCollection<ScheduledChore>();
 
             try
             {
@@ -228,10 +252,18 @@ namespace Housekeeper
                     {
                         while (reader.Read())
                         {
-                            ScheduledChore scheduledChore = new ScheduledChore();
-                            scheduledChore.ID = Convert.ToInt32(reader[ID_COL]);
-                            scheduledChore.ChoreID = Convert.ToInt32(reader[CHORE_COL]);
-                            scheduledChore.UserID = Convert.ToInt32(reader[ASSIGNED_COL]);
+                            int choreId = Convert.ToInt32(reader[CHORE_COL]);
+                            int userId = Convert.ToInt32(reader[ASSIGNED_COL]);
+                            Chore chore = allChores.FirstOrDefault(c => c.ID == choreId);
+                            User user = allUsers.First(u => u.ID == userId);
+                            ScheduledChore scheduledChore = new ScheduledChore(chore)
+                            {
+                                ID = Convert.ToInt32(reader[ID_COL]),
+                                ChoreID = choreId,
+                                UserID = userId,
+                                AssignedTo = user
+                            };
+
                             tasks.Add(scheduledChore);
                         }
                     }
@@ -248,24 +280,15 @@ namespace Housekeeper
         /// <summary>
         /// Assigns the chore to the user, updating the assignment if the chore was already scheduled
         /// </summary>
-        public void AssignChore(Chore chore, User user, int oldId = -1)
+        public void AssignChore(ScheduledChore chore)
         {
             try
             {
                 _conn.Open();
 
-                string sql = string.Empty;
-
-                if (oldId > -1)
-                    sql = $"UPDATE [{SCHEDULE_TABLE}] " +
-                          $"SET {ASSIGNED_COL} = {user.ID} " +
-                          $"WHERE {ID_COL} = {oldId}";
-
-                else
-                    sql = $"INSERT INTO [{SCHEDULE_TABLE}] " +
-                          $"({CHORE_COL}, {ASSIGNED_COL}) " +
-                          $"VALUES " +
-                          $"({chore.ID}, {user.ID})";
+                string sql = $"UPDATE [{SCHEDULE_TABLE}] " +
+                             $"SET {ASSIGNED_COL} = {chore.UserID} " +
+                             $"WHERE {ID_COL} = {chore.ID}";
 
                 using (OleDbCommand command = new OleDbCommand(sql, _conn))
                 {
@@ -281,7 +304,7 @@ namespace Housekeeper
         /// <summary>
         /// Removes the chore from the current schedule
         /// </summary>
-        public void CompleteChore(Chore chore)
+        public void DeleteScheduledChore(Chore chore)
         {
             try
             {

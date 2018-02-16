@@ -1,9 +1,8 @@
-﻿using Housekeeper.Model;
-using Housekeeper.View;
+﻿using Housekeeper.View;
 using Housekeeper.ViewModel;
-using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
+using Housekeeper.Model;
 
 namespace Housekeeper
 {
@@ -23,6 +22,8 @@ namespace Housekeeper
             DataContext = _main;
         }
 
+        #region Login
+
         private void Login_OnClick(object sender, RoutedEventArgs e)
         {
             _main.Login();
@@ -40,34 +41,44 @@ namespace Housekeeper
             }
         }
 
-        private void AddChore_OnClick(object sender, RoutedEventArgs e)
+        private void UserCombo_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            EditChoreDialog dlg = new EditChoreDialog(_main.AllUsers);
-            dlg.ShowDialog();
+            _main.UpdateProperties();
+        }
 
-            if (dlg.DialogResult == true)
-            {
-                _main.AddChore(dlg.EditableChore);
+        #endregion Login
 
-                // Grab the chore from the collection now that it has been added, to get the ID
-                Chore addedChore = _main.AllChores.FirstOrDefault(c =>
-                    c.Category.Equals(dlg.EditableChore.Category) && c.Task.Equals(dlg.EditableChore.Task));
+        #region Schedule
 
-                if (dlg.AssignedUser != null)
-                    _main.ScheduleChore(addedChore, dlg.AssignedUser);
-            }
+        private void ScheduleChore_OnClick(object sender, RoutedEventArgs e)
+        {
+
         }
 
         private void EditChore_OnClick(object sender, RoutedEventArgs e)
         {
-            EditChoreDialog dlg = new EditChoreDialog(_main.SelectedChore, _main.SelectedChore.AssignedTo, _main.AllUsers);
-            dlg.ShowDialog();
-
-            if (dlg.DialogResult == true)
+            try
             {
-                _main.EditChore(dlg.EditableChore);
-                if (!_main.SelectedChore.AssignedTo.Username.Equals(dlg.AssignedUser.Username))
-                    _main.ScheduleChore(dlg.EditableChore, dlg.AssignedUser);
+                _main.EdittingChore = true;
+                EditChoreDialog dlg = new EditChoreDialog { DataContext = _main };
+                dlg.ShowDialog();
+
+                if (dlg.DialogResult == true)
+                {
+                    if (dlg.DeletingChore)
+                    {
+                        _main.DeleteScheduledChore();
+                    }
+                    else
+                    {
+                        _main.EditChore();
+                        _main.ScheduleChore();
+                    }
+                }
+            }
+            finally
+            {
+                _main.EdittingChore = false;
             }
         }
 
@@ -76,7 +87,47 @@ namespace Housekeeper
             _main.CompleteChore();
         }
 
-        private void UserCombo_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
+        #endregion Schedule
+
+        #region Chore Collection
+
+        private void AddChore_OnClick(object sender, RoutedEventArgs e)
+        {
+            ScheduledChore temp = _main.SelectedChore;
+
+            try
+            {
+                _main.AddingChore = true;
+                _main.SelectedChore = null;
+
+                EditChoreDialog dlg = new EditChoreDialog { DataContext = _main };
+                dlg.ShowDialog();
+
+                if (dlg.DialogResult == true)
+                    _main.AddChore();
+            }
+            finally
+            {
+                _main.AddingChore = false;
+                _main.SelectedChore = temp;
+            }
+        }
+
+        private void DeleteChore_OnClick(object sender, RoutedEventArgs e)
+        {
+            MessageBoxResult result = MessageBox.Show($"Are you sure you want to delete {_main.SelectedChore} from the directory?", "Delete Confirmation",
+                MessageBoxButton.YesNo, MessageBoxImage.Question);
+
+            if (result == MessageBoxResult.Yes)
+            {
+
+                _main.DeleteScheduledChore();
+            }
+        }
+
+        #endregion Chore Collection
+
+        private void Schedule_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             _main.UpdateProperties();
         }
