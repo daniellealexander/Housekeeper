@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel;
 
 namespace Housekeeper.Model
 {
@@ -8,6 +9,7 @@ namespace Housekeeper.Model
 
         public int ID { get; set; }
         public ChoreCategory Category { get; set; }
+        public string CategoryString { get { return Category.ToString(); } }
         public string Task { get; set; }
         public DateTime LastPerform { get; set; }
         public int Frequency { get; set; }
@@ -19,12 +21,30 @@ namespace Housekeeper.Model
 
         public enum ChoreCategory
         {
-            General,
+            [Description("Bedroom")]
             Bedroom,
+
+            [Description("Kitchen")]
+            Kitchen,
+
+            [Description("Living")]
+            Living,
+
+            [Description("Bathroom")]
             Bathroom,
-            Kitchen
+
+            [Description("Outdoors")]
+            Outdoors,
+
+            [Description("General")]
+            General
         }
 
         #endregion Enums
+
+        public override string ToString()
+        {
+            return $"{Category} - {Task}";
+        }
     }
 }
