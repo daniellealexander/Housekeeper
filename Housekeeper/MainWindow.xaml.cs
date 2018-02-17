@@ -43,7 +43,7 @@ namespace Housekeeper
 
         private void UserCombo_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            _main.UpdateProperties();
+            _main.OnPropertyChanged("AllowLogin");
         }
 
         #endregion Login
@@ -52,7 +52,13 @@ namespace Housekeeper
 
         private void ScheduleChore_OnClick(object sender, RoutedEventArgs e)
         {
+            ScheduleChoreDialog dlg = new ScheduleChoreDialog() { DataContext = _main };
+            dlg.ShowDialog();
 
+            if (dlg.DialogResult == true)
+            {
+                _main.ScheduleChore();
+            }
         }
 
         private void EditChore_OnClick(object sender, RoutedEventArgs e)
@@ -121,7 +127,7 @@ namespace Housekeeper
             if (result == MessageBoxResult.Yes)
             {
 
-                _main.DeleteScheduledChore();
+                _main.DeleteChore();
             }
         }
 
@@ -129,7 +135,7 @@ namespace Housekeeper
 
         private void Schedule_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            _main.UpdateProperties();
+            _main.OnPropertyChanged("ChoreSelected");
         }
     }
 }

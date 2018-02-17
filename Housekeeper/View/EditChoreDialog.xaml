@@ -71,7 +71,8 @@
             <Button Margin="5,0,0,0" Padding="8" Width="100" Content="Cancel" 
                 IsCancel="True"/>
             <Button Margin="5,0,0,0" Padding="8" Width="100" Content="Delete" 
-                    Click="BtnDelete_Click"/>
+                    Click="BtnDelete_Click"
+                    Visibility="{Binding EdittingChore, Converter={StaticResource BooleanToVisibilityConverter}}"/>
         </StackPanel>
     </Grid>
 </Window>

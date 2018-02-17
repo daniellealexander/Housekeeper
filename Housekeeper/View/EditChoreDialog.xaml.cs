@@ -35,7 +35,7 @@ namespace Housekeeper.View
         /// </summary>
         private void BtnOk_Click(object sender, RoutedEventArgs e)
         {
-            if (CategoryBox.SelectedValue == null ||
+            if (CategoryBox.SelectedItem == null ||
                 string.IsNullOrEmpty(TaskBox.Text) ||
                 FrequencyBox.Text == null ||
                 DurationBox.Text == null ||

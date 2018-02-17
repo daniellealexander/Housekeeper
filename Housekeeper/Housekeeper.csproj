@@ -81,6 +81,9 @@
     <Compile Include="View\NewUserDialog.xaml.cs">
       <DependentUpon>NewUserDialog.xaml</DependentUpon>
     </Compile>
+    <Compile Include="View\ScheduleChoreDialog.xaml.cs">
+      <DependentUpon>ScheduleChoreDialog.xaml</DependentUpon>
+    </Compile>
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -99,6 +102,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="View\NewUserDialog.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="View\ScheduleChoreDialog.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
