@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Data;
-using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 
@@ -37,6 +36,7 @@ namespace Housekeeper.ViewModel
         public List<string> AllCategories { get; set; }
         public List<User> AllUsers { get; set; }
         public List<Chore> AllChores { get; set; }
+        public List<Chore> CategorizedChores { get; set; }
         public List<Task> AllTasks { get; set; }
         public ObservableCollection<ScheduledChore> ScheduledChores { get; set; }
 
@@ -64,7 +64,6 @@ namespace Housekeeper.ViewModel
             AllCategories = new List<string>() { "Bedroom", "Kitchen", "Living", "Bathroom", "Outdoors", "General" };
             AllUsers = _repo.GetUsers();
             AllChores = _repo.GetChores();
-            ScheduledChores = _repo.GetScheduledChores(AllChores, AllUsers);
         }
 
         /// <summary>
@@ -73,6 +72,9 @@ namespace Housekeeper.ViewModel
         public void Login()
         {
             if (CurrentUser == null) return;
+
+            ScheduledChores = _repo.GetScheduledChores(AllChores, AllUsers, CurrentUser);
+            OnPropertyChanged("ScheduledChores");
 
             ShowLogin = false;
             OnPropertyChanged("ShowLogin");
@@ -115,7 +117,7 @@ namespace Housekeeper.ViewModel
         public void ScheduleChore()
         {
             _repo.AssignChore(SelectedChore);
-            ScheduledChores = _repo.GetScheduledChores(AllChores, AllUsers);
+            ScheduledChores = _repo.GetScheduledChores(AllChores, AllUsers, CurrentUser);
             OnPropertyChanged("ScheduledChores");
         }
 
@@ -130,7 +132,7 @@ namespace Housekeeper.ViewModel
             OnPropertyChanged("AllChores");
 
             _repo.DeleteScheduledChore(SelectedChore);
-            ScheduledChores = _repo.GetScheduledChores(AllChores, AllUsers);
+            ScheduledChores = _repo.GetScheduledChores(AllChores, AllUsers, CurrentUser);
             OnPropertyChanged("ScheduledChores");
         }
 
@@ -139,13 +141,11 @@ namespace Housekeeper.ViewModel
         /// </summary>
         public void DeleteChore()
         {
-            _repo.DeleteScheduledChore(SelectedChore);
-            ScheduledChores = _repo.GetScheduledChores(AllChores, AllUsers);
-            OnPropertyChanged("ScheduledChores");
-
             _repo.DeleteChore(SelectedChore);
             AllChores = _repo.GetChores();
             OnPropertyChanged("AllChores");
+            ScheduledChores = _repo.GetScheduledChores(AllChores, AllUsers, CurrentUser);
+            OnPropertyChanged("ScheduledChores");
         }
 
         /// <summary>
@@ -154,23 +154,14 @@ namespace Housekeeper.ViewModel
         public void DeleteScheduledChore()
         {
             _repo.DeleteScheduledChore(SelectedChore);
-            ScheduledChores = _repo.GetScheduledChores(AllChores, AllUsers);
+            ScheduledChores = _repo.GetScheduledChores(AllChores, AllUsers, CurrentUser);
             OnPropertyChanged("ScheduledChores");
-        }
-
-        /// <summary>
-        /// Helper method to update the enabled state for the Login button
-        /// </summary>
-        public void UpdateProperties()
-        {
-            OnPropertyChanged("AllowLogin");
-            OnPropertyChanged("ChoreSelected");
         }
 
         /// <summary>
         /// Required for IPropertyChanged
         /// </summary>
-        protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
+        public virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
