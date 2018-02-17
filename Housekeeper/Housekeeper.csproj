@@ -53,6 +53,9 @@
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
     <Prefer32Bit>true</Prefer32Bit>
   </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationIcon>Housekeeper.ico</ApplicationIcon>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Data" />
@@ -156,6 +159,14 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Resources\CreateChore.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Housekeeper.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Resources\Housekeeper.mdb">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
