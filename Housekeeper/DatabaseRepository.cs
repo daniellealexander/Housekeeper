@@ -49,7 +49,7 @@ namespace Housekeeper
 
         private void InitializeConnection()
         {
-            string dbPath = Path.Combine(Environment.CurrentDirectory, "..\\..\\..\\..\\Housekeeper.mdb");
+            string dbPath = Path.Combine(Environment.CurrentDirectory, "Resources\\Housekeeper.mdb");
             OleDbConnectionStringBuilder builder = new OleDbConnectionStringBuilder();
             builder.Provider = "Microsoft.Jet.OLEDB.4.0";
             builder.DataSource = dbPath;
